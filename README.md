@@ -1,112 +1,82 @@
-# GrowCube Home Assistant Integration
+# 🌱 GrowCube Home Assistant Integration
 
-This project brings full GrowCube smart plant watering automation and dashboarding into Home Assistant, with multi-plant support, soil moisture tracking, manual triggers, visual dashboards, and intelligent notifications.
+This package provides complete automation, dashboards, alerts, and manual controls for GrowCube irrigation systems inside Home Assistant.
 
----
-
-## Features
-
-- ✨ Supports 4 plants (A–D)
-- 📉 Historical moisture graphs (per plant)
-- ⏳ Adaptive watering (until moisture ≥ 40%, with pause/cycle control)
-- 🛠️ Input sliders for watering delay & retry limit
-- 📣 Voice or push alerts on dry soil, empty tank, or missed improvements
-- 🏠 Mobile-friendly dashboards with on-demand watering buttons
-- 🔴 Critical alert view (low moisture, empty tank, failures)
+## ✅ Features
+- Automatic watering per plant (A–D) with pause and moisture check
+- Manual watering dashboard with per-plant buttons
+- Central watering control (pause, cycle count)
+- Moisture history graphs
+- Alerts for low moisture and empty water tank
+- Fully mobile-optimized dashboard layout
+- Blueprint & script-based design for easy reuse
 
 ---
 
-## Requirements
+## 📁 Included
 
-### Hardware
-- GrowCube controller (via Bluetooth to Home Assistant)
-
-### Home Assistant Add-ons
-- [HACS](https://hacs.xyz/) (Home Assistant Community Store)
-- Bluetooth support (via ESPHome, USB dongle, or system)
-
-### HACS Custom Cards (Frontend)
-- [Mini Graph Card](https://github.com/kalkih/mini-graph-card)
-- [Expander Card](https://github.com/custom-cards/expander-card) *(optional)*
+- `blueprints/automation/growcube_auto_water.yaml` – Reusable automation blueprint
+- `scripts/water_growcube_plant_on_demand.yaml` – Manual watering script
+- `dashboards/growcube_dashboard.yaml` – Full UI dashboard with controls and graphs
+- `dashboards/growcube_alerts.yaml` – Alerts-only view for mobile/critical status
+- `README.md` – This file
 
 ---
 
-## Installation
+## 🔧 Setup Instructions
 
-### 1. Add Helpers
-In **Settings → Devices & Services → Helpers**, create:
+### 1. Prerequisites
 
-- `input_number.watering_pause_minutes`
-  - Min: 1, Max: 10, Step: 1, Initial: 2
-- `input_number.watering_max_cycles`
-  - Min: 1, Max: 30, Step: 1, Initial: 20
+- Home Assistant (latest version)
+- HACS installed with:
+  - Mini Graph Card (`kalkih/mini-graph-card`)
+  - Expander Card (`custom-cards/expander-card`)
 
----
+### 2. Clone or Copy Files
 
-### 2. Import Script: `Water GrowCube Plant On Demand`
+Copy the contents of this repository into your Home Assistant config directory:
 
-Go to **Settings → Automations & Scenes → Scripts → Add Script → Edit in YAML** and paste:
-
-```yaml
-# See scripts/water_growcube_plant_on_demand.yaml
+```
+/config/
+│
+├── blueprints/automation/growcube_auto_water.yaml
+├── scripts/water_growcube_plant_on_demand.yaml
+├── dashboards/growcube_dashboard.yaml
+├── dashboards/growcube_alerts.yaml
+└── README.md
 ```
 
----
+### 3. Import Blueprint
 
-### 3. Import Automation Blueprint
-Place this file into:
-```
-/config/blueprints/automation/growcube/growcube_auto_water.yaml
-```
-Use the blueprint to auto-water each plant when dry.
+- Go to **Settings → Automations → Blueprints → Import Blueprint**
+- Browse to `growcube_auto_water.yaml` and load it
 
----
+### 4. Load Script
 
-### 4. Add Dashboards
+- In **Settings → Scripts → Edit in YAML**, paste contents of `water_growcube_plant_on_demand.yaml`
 
-#### GrowCube Summary View
-Includes:
-- Moisture graphs
-- Manual watering
-- Input sliders
-- Water tank warning
-- Last moisture update
+### 5. Add Dashboards
 
-#### GrowCube Alerts View
-Includes:
-- Tank empty alert
-- Low soil moisture
-- Warning logbook
-- Moisture recovery tracking
+- Add views to your UI using `growcube_dashboard.yaml` and `growcube_alerts.yaml`
+- Use **Raw Editor** or **Storage mode** and paste each view YAML
 
-Use the `dashboards/growcube-summary.yaml` and `dashboards/growcube-alerts.yaml` YAML files.
+### 6. Create Helpers
+
+In **Settings → Helpers**, create:
+
+- `input_number.watering_pause_minutes` (1–10, default 2)
+- `input_number.watering_max_cycles` (1–30, default 20)
 
 ---
 
-## Configuration Example
+## 🧪 Test It
 
-- **Moisture sensors:** `sensor.growcube_c75b31_moisture_a` ... `_d`
-- **Water buttons:** `button.growcube_c75b31_water_plant_a` ... `_d`
-- **Water warning:** `binary_sensor.growcube_c75b31_water_warning`
-
-Each plant can be watered manually via button or automatically via automation.
+1. Simulate dry soil (manually lower a moisture sensor reading)
+2. Use dashboard to trigger watering
+3. Check for notification, moisture rise, graph update
 
 ---
 
-## License
-MIT
+## ❤️ Credits
 
----
-
-## Credits
-- Developed with OpenAI's ChatGPT and Home Assistant Community tools.
-- Inspired by the GrowCube ecosystem and plant automation needs.
-
----
-
-## Screenshots
-*Coming soon: Example dashboards with moisture tracking and buttons.*
-
----
-
-Enjoy automated, reliable, and beautiful plant care with GrowCube and Home Assistant! 🌿
+Built with 💧 by the Home Assistant + GrowCube community.
