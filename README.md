@@ -41,7 +41,7 @@ Copy the contents of this repository into your Home Assistant config directory:
 ```
 /config/
 │
-├── blueprints/automation/growcube_auto_water.yaml
+├── blueprints/automation/growcube/growcube_auto_water.yaml
 ├── scripts/water_growcube_plant_on_demand.yaml
 ├── dashboards/growcube_dashboard.yaml
 ├── dashboards/growcube_alerts.yaml
