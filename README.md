@@ -33,6 +33,7 @@ This package provides complete automation, dashboards, alerts, and manual contro
 - HACS installed with:
   - Mini Graph Card (`kalkih/mini-graph-card`)
   - Expander Card (`custom-cards/expander-card`)
+  - Elecrow GrowCube integration for Home Assistant (`https://github.com/jonnybergdahl/HomeAssistant_Growcube_Integration`)
 
 ### 2. Clone or Copy Files
 
