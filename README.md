@@ -1,3 +1,5 @@
+![GrowCube HA](https://img.shields.io/badge/GrowCube-Automated-green?style=flat-square&logo=home-assistant)[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://hacs.xyz)
+
 # 🌱 GrowCube Home Assistant Integration
 
 This package provides complete automation, dashboards, alerts, and manual controls for GrowCube irrigation systems inside Home Assistant.
