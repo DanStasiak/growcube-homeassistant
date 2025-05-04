@@ -56,10 +56,14 @@ blueprint:
           max: 30
           unit_of_measurement: cycles
 
+variables:
+  moisture_sensor_entity: !input moisture_sensor
+  moisture_low_entity: !input moisture_low
+
 trigger:
   - platform: template
     value_template: >
-      {{ states(!input moisture_sensor) | float(0) < states(!input moisture_low) | float(0) }}
+      {{ states(moisture_sensor_entity) | float(0) < states(moisture_low_entity) | float(0) }}
 
 condition: []
 
