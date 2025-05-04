@@ -1,1 +1,123 @@
-# Blueprint YAML placeholder
+blueprint:
+  name: GrowCube Auto Watering (Single Plant)
+  description: >
+    Automatically waters a GrowCube plant when moisture is below a set low threshold
+    and continues watering until the high threshold is reached or water runs out.
+  domain: automation
+  input:
+    moisture_sensor:
+      name: Moisture Sensor
+      selector:
+        entity:
+          domain: sensor
+    water_button:
+      name: Water Button
+      selector:
+        entity:
+          domain: button
+    plant_name:
+      name: Plant Name
+      selector:
+        text:
+    water_warning_sensor:
+      name: Water Warning Sensor
+      selector:
+        entity:
+          domain: binary_sensor
+    phone_notify_service:
+      name: Notification Service
+      default: notify.mobile_app_danphone
+      selector:
+        text:
+    moisture_low:
+      name: Moisture Threshold (Start Watering)
+      selector:
+        entity:
+          domain: input_number
+    moisture_high:
+      name: Moisture Threshold (Stop Watering)
+      selector:
+        entity:
+          domain: input_number
+    pause_minutes:
+      name: Pause Between Waterings (minutes)
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 10
+          unit_of_measurement: minutes
+    max_cycles:
+      name: Max Watering Cycles
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 30
+          unit_of_measurement: cycles
+
+trigger:
+  - platform: template
+    value_template: >
+      {{ states(moisture_sensor) | float(0) < states(moisture_low) | float(0) }}
+
+condition: []
+
+action:
+  - variables:
+      counter: 0
+      low: "{{ states(moisture_low) | float(0) }}"
+      high: "{{ states(moisture_high) | float(0) }}"
+      pause: "{{ pause_minutes | int }}"
+      cycles: "{{ max_cycles | int }}"
+
+  - service: !input phone_notify_service
+    data:
+      title: "🌱 Watering {{ plant_name }}"
+      message: "Moisture ≤{{ low }}. Watering until ≥{{ high }}."
+
+  - repeat:
+      while:
+        - condition: template
+          value_template: >
+            {{ states(moisture_sensor) | float(0) < high and
+               counter < cycles and
+               states(water_warning_sensor) == 'off' }}
+      sequence:
+        - service: button.press
+          target:
+            entity_id: !input water_button
+        - delay:
+            minutes: "{{ pause }}"
+        - variables:
+            counter: "{{ counter + 1 }}"
+
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ states(water_warning_sensor) == 'on' }}"
+        sequence:
+          - service: !input phone_notify_service
+            data:
+              title: ❌ Watering Aborted
+              message: "{{ plant_name }}: Water tank empty. Stopped after {{ counter }} cycles."
+
+      - conditions:
+          - condition: template
+            value_template: "{{ states(moisture_sensor) | float(0) < high }}"
+        sequence:
+          - service: !input phone_notify_service
+            data:
+              title: ⚠️ Moisture Warning
+              message: "{{ plant_name }}: Still <{{ high }} after {{ cycles * pause }} minutes."
+
+      - conditions:
+          - condition: template
+            value_template: "{{ states(moisture_sensor) | float(0) >= high }}"
+        sequence:
+          - service: !input phone_notify_service
+            data:
+              title: ✅ Watering Complete
+              message: "{{ plant_name }} moisture is now {{ states(moisture_sensor) }}%."
+
+mode: single
