@@ -1,1 +1,98 @@
-# Script YAML placeholder
+alias: Water GrowCube Plant On Demand
+mode: queued
+fields:
+  plant_name:
+    name: Plant Name
+    description: e.g., Plant A
+    required: true
+    selector:
+      text:
+  moisture_sensor:
+    name: Moisture Sensor
+    selector:
+      entity:
+        domain: sensor
+  water_button:
+    name: Water Button
+    selector:
+      entity:
+        domain: button
+  water_warning_sensor:
+    name: Water Warning Sensor
+    selector:
+      entity:
+        domain: binary_sensor
+  phone_notify_service:
+    name: Notification Service
+    default: notify.mobile_app_danphone
+    selector:
+      text:
+  moisture_low:
+    name: Moisture Threshold (Start Watering)
+    selector:
+      entity:
+        domain: input_number
+  moisture_high:
+    name: Moisture Threshold (Stop Watering)
+    selector:
+      entity:
+        domain: input_number
+
+sequence:
+  - variables:
+      counter: 0
+      low: "{{ states(moisture_low) | float(0) }}"
+      high: "{{ states(moisture_high) | float(0) }}"
+      current: "{{ states(moisture_sensor) | float(0) }}"
+
+  - condition: template
+    value_template: "{{ current <= low }}"
+
+  - service: "{{ phone_notify_service }}"
+    data:
+      title: "🌱 Manual Watering: {{ plant_name }}"
+      message: "Moisture ≤{{ low }}. Starting watering until ≥{{ high }}."
+
+  - repeat:
+      while:
+        - condition: template
+          value_template: >
+            {{ states(moisture_sensor) | float(0) < high and
+               counter < 20 and
+               states(water_warning_sensor) == 'off' }}
+      sequence:
+        - service: button.press
+          target:
+            entity_id: "{{ water_button }}"
+        - delay:
+            minutes: 2
+        - variables:
+            counter: "{{ counter + 1 }}"
+
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ states(water_warning_sensor) == 'on' }}"
+        sequence:
+          - service: "{{ phone_notify_service }}"
+            data:
+              title: ❌ Watering Aborted
+              message: "{{ plant_name }}: Water tank empty. Stopped after {{ counter }} cycles."
+
+      - conditions:
+          - condition: template
+            value_template: "{{ states(moisture_sensor) | float(0) < high }}"
+        sequence:
+          - service: "{{ phone_notify_service }}"
+            data:
+              title: ⚠️ Moisture Warning
+              message: "{{ plant_name }}: Still <{{ high }} after {{ counter * 2 }} minutes."
+
+      - conditions:
+          - condition: template
+            value_template: "{{ states(moisture_sensor) | float(0) >= high }}"
+        sequence:
+          - service: "{{ phone_notify_service }}"
+            data:
+              title: ✅ Watering Complete
+              message: "{{ plant_name }} moisture is now {{ states(moisture_sensor) }}%."
