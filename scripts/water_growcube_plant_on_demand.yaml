@@ -3,7 +3,6 @@ mode: queued
 fields:
   plant_name:
     name: Plant Name
-    description: e.g., Plant A
     required: true
     selector:
       text:
@@ -27,22 +26,13 @@ fields:
     default: notify.mobile_app_danphone
     selector:
       text:
-  moisture_low:
-    name: Moisture Threshold (Start Watering)
-    selector:
-      entity:
-        domain: input_number
-  moisture_high:
-    name: Moisture Threshold (Stop Watering)
-    selector:
-      entity:
-        domain: input_number
 
 sequence:
   - variables:
       counter: 0
-      low: "{{ states(moisture_low) | float(0) }}"
-      high: "{{ states(moisture_high) | float(0) }}"
+      low: "{{ states('input_number.watering_low_threshold') | float(0) }}"
+      high: "{{ states('input_number.watering_high_threshold') | float(0) }}"
+      pause: "{{ states('input_number.watering_pause_minutes') | int }}"
       current: "{{ states(moisture_sensor) | float(0) }}"
 
   - condition: template
@@ -65,7 +55,7 @@ sequence:
           target:
             entity_id: "{{ water_button }}"
         - delay:
-            minutes: 2
+            minutes: "{{ pause }}"
         - variables:
             counter: "{{ counter + 1 }}"
 
@@ -86,7 +76,7 @@ sequence:
           - service: "{{ phone_notify_service }}"
             data:
               title: ⚠️ Moisture Warning
-              message: "{{ plant_name }}: Still <{{ high }} after {{ counter * 2 }} minutes."
+              message: "{{ plant_name }}: Still <{{ high }} after {{ counter * pause }} minutes."
 
       - conditions:
           - condition: template
