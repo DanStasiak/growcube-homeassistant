@@ -69,7 +69,8 @@ In **Settings → Helpers**, create:
 
 - `input_number.watering_pause_minutes` (1–10, default 2)
 - `input_number.watering_max_cycles` (1–30, default 20)
-
+- `input_number.watering_low_threshold` (1–100)
+- `input_number.watering_high_threshold` (1–100)
 ---
 
 ## 🧪 Test It
